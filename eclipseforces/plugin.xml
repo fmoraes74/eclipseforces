@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="languagesupport" name="EclipseForce language support" schema="schema/net.fmoraes.eclipseforces.languagesupport.exsd"/>
+   <extension
+         point="org.eclipse.ui.views">
+      <view
+            category="net.fmoraes.eclipseforces.views"
+            class="net.fmoraes.eclipseforces.ProblemListView"
+            icon="icons/codeforces.png"
+            id="net.fmoraes.eclipseforces.ProblemListView"
+            name="Problem List"
+            restorable="true">
+      </view>
+      <category
+            id="net.fmoraes.eclipseforces.views"
+            name="EclipseForces">
+      </category>
+      <view
+            category="net.fmoraes.eclipseforces.views"
+            class="net.fmoraes.eclipseforces.ContestListView"
+            icon="icons/codeforces.png"
+            id="net.fmoraes.eclipseforces.ContestListView"
+            name="Contest List"
+            restorable="true">
+      </view>
+      <view
+            allowMultiple="false"
+            category="net.fmoraes.eclipseforces.views"
+            class="net.fmoraes.eclipseforces.ProblemStatementView"
+            icon="icons/codeforces.png"
+            id="net.fmoraes.eclipseforces.ProblemStatementView"
+            name="Problem Statement"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="net.fmoraes.eclipseforces.languagesupport">
+      <languagesupport
+            class="net.fmoraes.eclipseforces.java.JavaLanguageSupport"
+            language="Java">
+      </languagesupport>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="net.fmoraes.eclipseforces.PreferencesPage"
+            id="net.fmoraes.eclipseforces.PreferencesPage"
+            name="EclipseForces">
+      </page>
+      <page
+            category="net.fmoraes.eclipseforces.PreferencesPage"
+            class="net.fmoraes.eclipseforces.java.JavaPreferencesPage"
+            id="net.fmoraes.eclipseforces.java.JavaPreferencesPage"
+            name="Java">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="net.fmoraes.eclipseforces.java.PreferenceInitializer">
+      </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.core.classpathVariableInitializer">
+      <classpathVariableInitializer
+            variable="ECLIPSEFORCES"
+            class="net.fmoraes.eclipseforces.util.EclipseForcesVariableInitializer"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="net.fmoraes.eclipseforces.java.AddTestCase"
+            commandId="net.fmoraes.eclipseforces.commands.addTestCase">
+          <activeWhen>
+            <or>
+             <with variable="activeMenuSelection">
+               <iterate ifEmpty="false">
+                 <adapt type="org.eclipse.core.resources.IResource">
+                   <test property="org.eclipse.core.resources.name" value="*Test.java"/>
+                 </adapt>
+               </iterate>
+             </with>
+             <with variable="activeEditorInput">
+                 <adapt type="org.eclipse.core.resources.IResource">
+                   <test property="org.eclipse.core.resources.name" value="*Test.java"/>
+                 </adapt>
+             </with>
+            </or>
+          </activeWhen>
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="net.fmoraes.eclipseforces.commands.addTestCase"
+            contextId="org.eclipse.ui.contexts.window"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+6">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+          <menuContribution
+                locationURI="popup:org.eclipse.ui.popup.any?after=additions">
+              <menu id="net.fmoraes.eclipseforces.menus" label="Eclipseforces">
+                  <command
+                      commandId="net.fmoraes.eclipseforces.commands.addTestCase"
+                      id="net.fmoraes.eclipseforces.menus.addTestCase"
+                      mnemonic="A">
+                      <visibleWhen>
+                        <or>
+                         <with variable="activeMenuSelection">
+                           <iterate ifEmpty="false">
+                             <adapt type="org.eclipse.core.resources.IResource">
+                               <test property="org.eclipse.core.resources.name" value="*Test.java"/>
+                             </adapt>
+                           </iterate>
+                         </with>
+                         <with variable="activeEditorInput">
+                             <adapt type="org.eclipse.core.resources.IResource">
+                               <test property="org.eclipse.core.resources.name" value="*Test.java"/>
+                             </adapt>
+                         </with>
+                        </or>
+                      </visibleWhen>
+                  </command>
+              </menu>
+          </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="net.fmoraes.eclipseforces.commands"
+            id="net.fmoraes.eclipseforces.commands.addTestCase"
+            name="Add Testcase">
+      </command>
+      <category
+            id="net.fmoraes.eclipseforces.commands"
+            name="EclipseForces">
+      </category>
+   </extension>
+
+</plugin>
