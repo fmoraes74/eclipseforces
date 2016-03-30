@@ -34,16 +34,6 @@ public class ProblemStatement {
 
   private String contest;
   
-  public String getContest()
-  {
-    return contest;
-  }
-
-  public void setContest(String contest)
-  {
-    this.contest = contest;
-  }
-
   private String id;
   
   private String name;
@@ -57,6 +47,32 @@ public class ProblemStatement {
   private String contestName;
   
   private double error;
+
+  private List<TestCase> testCases = new ArrayList<TestCase>();
+
+  private String modulo = "";
+  
+  private String memoryLimit;
+
+  public String getMemoryLimit()
+  {
+    return memoryLimit;
+  }
+
+  public void setMemoryLimit(String memoryLimit)
+  {
+    this.memoryLimit = memoryLimit;
+  }
+
+  public String getContest()
+  {
+    return contest;
+  }
+
+  public void setContest(String contest)
+  {
+    this.contest = contest;
+  }
 
   public double getError()
   {
@@ -97,10 +113,6 @@ public class ProblemStatement {
   {
     this.timeLimit = timeLimit;
   }
-
-  private List<TestCase> testCases = new ArrayList<TestCase>();
-
-  private String modulo = "";
 
   public String getHtmlDescription() {
     return htmlDescription;

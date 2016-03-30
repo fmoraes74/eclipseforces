@@ -162,6 +162,11 @@ public class CodeforcesParser {
     if(timeLimit.find()) {
       ps.setTimeLimit(timeLimit.group(1));
     }
+    
+    Matcher memoryLimit = Pattern.compile("class=\"memory-limit\">.*?</div>(\\d+) .+?</div>").matcher(text);
+    if(memoryLimit.find()) {
+      ps.setMemoryLimit(memoryLimit.group(1));
+    }
 
     Matcher m = Pattern.compile("mod(ulo)? (\\d[\\d,\\.]*\\d)").matcher(text);
     if(m.find()) {

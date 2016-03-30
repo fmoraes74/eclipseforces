@@ -1,5 +1,8 @@
 package net.fmoraes.eclipseforces.util;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.StringTokenizer;
 
 
@@ -17,6 +20,25 @@ public class SolutionChecker {
   {
     error = e;
     relativeError = true;
+  }
+  
+  public String verify(FileReader expected, String output)
+  {
+    try {
+      StringWriter sw = new StringWriter();
+      
+      char[] buffer = new char[4096];
+      
+      int n = expected.read(buffer);
+      while(n != -1) {
+        sw.write(buffer, 0, n);
+        n = expected.read(buffer);
+      }
+      return verify(sw.toString(), output);
+    }
+    catch(IOException e) {
+      return e.getMessage();
+    }
   }
   
   public String verify(String expected, String output)

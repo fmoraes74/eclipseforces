@@ -11,6 +11,7 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -75,12 +76,34 @@ public class AddTestCase extends AbstractHandler {
               existing.add(num);
             }
           }
-          int next = existing.last() + 1;
+          if(i.length() > 2000 || o.length() > 2000) {
+            IField field = type.getField("watcher");
+            if(!field.exists()) {
+              String contents = "@Rule\npublic FileInputOutputWatcher watcher = new FileInputOutputWatcher();";
+
+              type.createField(contents, null, false, null);
+            }
+            if(!res.getImport("org.junit.Rule").exists()) {
+              res.createImport("org.junit.Rule", null, null);
+            }
+            if(!res.getImport("net.fmoraes.eclipseforces.java.FileInputOutputWatcher").exists()) {
+              res.createImport("net.fmoraes.eclipseforces.java.FileInputOutputWatcher", null, null);
+            }
+            if(i.length() > 2000 && !res.getImport("net.fmoraes.eclipseforces.java.TestInput").exists()) {
+              res.createImport("net.fmoraes.eclipseforces.java.TestInput", null, null);
+            }
+            if(o.length() > 2000 && !res.getImport("net.fmoraes.eclipseforces.java.TestOutput").exists()) {
+              res.createImport("net.fmoraes.eclipseforces.java.TestOutput", null, null);
+            }
+          }
+          int next = existing.size() > 0 ? (existing.last() + 1) : 0;
           IEclipsePreferences prefs = EclipseForcesPlugin.getProjectPrefs(project);
-          int timeLimit = prefs.getInt("timeout." + res.getElementName(), 1);
+          String name = res.getElementName();
+          int timeLimit = prefs.getInt("timeout." + name, 1);
           JavaCodeGenerator gen = new JavaCodeGenerator(new ArrayList<ProblemStatement>());
+          gen.setProject(project.getProject());
           StringBuilder result = new StringBuilder();
-          gen.getTestCaseSource(result, timeLimit, next, i, o);
+          gen.getTestCaseSource(result, name, timeLimit, next, i, o);
           type.createMethod(result.toString(), null, false, null);
         }
         catch(Exception e) {

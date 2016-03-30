@@ -2,11 +2,11 @@ package net.fmoraes.eclipseforces.java;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringEscapeUtils;
+
 import net.fmoraes.eclipseforces.EclipseForcesPlugin;
 import net.fmoraes.eclipseforces.ProblemStatement;
 import net.fmoraes.eclipseforces.languages.CodeGenerator;
-
-import org.apache.commons.lang3.StringEscapeUtils;
 
 public class JavaCodeGenerator extends CodeGenerator {
 
@@ -41,10 +41,31 @@ public class JavaCodeGenerator extends CodeGenerator {
 
   @Override
   public String getTestsSource(ProblemStatement ps) {
+    
+    boolean hasLargeInput = false;
+    boolean hasLargeOutput = false;
+    for(ProblemStatement.TestCase tc : ps.getTestCases()) {
+      if(tc.input.length() > 2000)
+        hasLargeInput = true;
+      if(tc.output.length() > 2000)
+        hasLargeOutput = true;
+      
+    }
+    boolean hasAnyLarge = hasLargeInput | hasLargeOutput;
+    
     StringBuilder result = new StringBuilder();
     result.append("import org.junit.Assert;\n");
     result.append("import org.junit.Before;\n");
+    if(hasAnyLarge)
+      result.append("import org.junit.Rule;\n");
     result.append("import org.junit.Test;\n\n");
+    if(hasAnyLarge)
+      result.append("import net.fmoraes.eclipseforces.java.FileInputOutputWatcher;\n");
+    if(hasLargeInput)
+      result.append("import net.fmoraes.eclipseforces.java.TestInput;\n");
+    if(hasLargeOutput)
+      result.append("import net.fmoraes.eclipseforces.java.TestOutput;\n");
+
     result.append("import net.fmoraes.eclipseforces.util.SolutionChecker;\n");
     result.append("import java.io.PrintWriter;\n");
     result.append("import java.io.StringReader;\n");
@@ -53,6 +74,11 @@ public class JavaCodeGenerator extends CodeGenerator {
     result.append("    protected SolutionChecker checker;\n");
     result.append("    protected "
         + ps.getClassName() + " solution;\n\n");
+    if(hasAnyLarge) {
+      result.append("    @Rule\n");
+      result.append("    public FileInputOutputWatcher watcher = new FileInputOutputWatcher();\n\n");
+    }
+
     result.append("    @Before\n");
     result.append("    public void setUp() {\n");
     result.append("        solution = new " + ps.getClassName()
@@ -66,7 +92,7 @@ public class JavaCodeGenerator extends CodeGenerator {
     int timeLimit = Integer.parseInt(ps.getTimeLimit());
     for (ProblemStatement.TestCase testCase : ps.getTestCases()) {
       i++;
-      getTestCaseSource(result, timeLimit, i, testCase.input, testCase.output);
+      getTestCaseSource(result, ps.getClassName(), timeLimit, i, testCase.input, testCase.output);
     }
 
     result.append("}\n");
@@ -74,7 +100,7 @@ public class JavaCodeGenerator extends CodeGenerator {
   }
   
   @Override
-  public void getTestCaseSource(StringBuilder result, int timeLimit, int number, String input,
+  public void getTestCaseSource(StringBuilder result, String className, int timeLimit, int number, String input,
       String output)
   {
     result.append("    @Test");
@@ -82,13 +108,29 @@ public class JavaCodeGenerator extends CodeGenerator {
       result.append(String.format("(timeout = %d)", 1000*timeLimit));
     }
     result.append("\n");
+    if(input.length() > 2000)
+      result.append("    @TestInput(fileName = \"testcases/" + className + "_testCase" + number + ".input\")\n");
+    if(output.length() > 2000)
+      result.append("    @TestOutput(fileName = \"testcases/" + className + "_testCase" + number + ".output\")\n");
     result.append("    public void testCase" + number + "() {\n");
-    result.append("        String input = \"" + StringEscapeUtils.escapeJava(input) + "\";\n");
-    result.append("        String expected = \"" + StringEscapeUtils.escapeJava(output) + "\";\n");
+    if(input.length() <= 2000)
+      result.append("        String input = \"" + StringEscapeUtils.escapeJava(input) + "\";\n");
+    else
+      createFile("testcases/" + className + "_testcase" + number + ".input", input);
+    if(output.length() <= 2000)
+      result.append("        String expected = \"" + StringEscapeUtils.escapeJava(output) + "\";\n");
+    else
+      createFile("testcases/" + className + "_testcase" + number + ".output", output);
     result.append("        StringWriter sw = new StringWriter();\n");
     result.append("        PrintWriter output = new PrintWriter(sw);\n");
-    result.append(String.format("        solution.solve(%d, new StringReader(input), output);\n", number));
-    result.append("        String result = checker.verify(expected, sw.toString());\n");
+    if(input.length() <= 2000)
+      result.append(String.format("        solution.solve(%d, new StringReader(input), output);\n", number));
+    else
+      result.append(String.format("        solution.solve(%d, watcher.getInputReader(), output);\n", number));
+    if(output.length() <= 2000)
+      result.append("        String result = checker.verify(expected, sw.toString());\n");
+    else
+      result.append("        String result = checker.verify(watcher.getOutputReader(), sw.toString());\n");
     result.append("        Assert.assertTrue(result, result == null);\n");
     result.append("    }\n\n");
   }

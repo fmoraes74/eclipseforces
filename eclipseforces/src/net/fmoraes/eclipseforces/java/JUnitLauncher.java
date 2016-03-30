@@ -26,6 +26,8 @@ class JUnitLauncher extends AbstractLauncher {
   private static final String JUNIT4_TEST_KIND_ID = "org.eclipse.jdt.junit.loader.junit4";
 
   private ICompilationUnit unit;
+  
+  private String memoryLimit;
 
   /**
    * Create a new launcher for a new java class file (ICompilationUnit).
@@ -33,8 +35,9 @@ class JUnitLauncher extends AbstractLauncher {
    * @param unit
    *            The .java file to run
    */
-  public JUnitLauncher(ICompilationUnit unit) {
+  public JUnitLauncher(ICompilationUnit unit, String memory) {
     this.unit = unit;
+    memoryLimit = memory;
   }
 
   private String getClassName() {
@@ -65,7 +68,10 @@ class JUnitLauncher extends AbstractLauncher {
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, projectName);
     config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, getClassName());
     config.setAttribute(JUNIT_TEST_KIND_ATTRIBUTE, JUNIT4_TEST_KIND_ID);
-    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, "-ea");
+    String vmArgs = "-ea";
+    if(memoryLimit != null)
+      vmArgs += " -Xmx" + memoryLimit + "M";
+    config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, vmArgs);
     // Setting preferred_launchers avoids being prompted for specific launcher, which may happen for JUnit when
     // Android Tools are installed (choice between "Eclipse JUnit Launcher" and "Android JUnit Test Launcher"):
     config.setAttribute("org.eclipse.debug.core.preferred_launchers",

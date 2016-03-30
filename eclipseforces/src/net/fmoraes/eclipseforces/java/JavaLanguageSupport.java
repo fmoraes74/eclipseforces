@@ -73,6 +73,8 @@ public class JavaLanguageSupport extends LanguageSupport {
   public IFile createLanguageProject(IProject project, ProblemStatement prob, Contest contest) throws CoreException, JavaModelException, IOException {
     IWorkspace workspace = ResourcesPlugin.getWorkspace();
     IJavaProject javaProject = JavaCore.create(project);
+    
+    getCodeGenerator().setProject(project);
 
     IProjectDescription newProjectDescription = workspace.newProjectDescription(project.getName());
     newProjectDescription.setNatureIds(new String[] { JavaCore.NATURE_ID });
@@ -115,7 +117,7 @@ public class JavaLanguageSupport extends LanguageSupport {
       if (javaElement != null && sourceFile == null) {
         // Run initial JUnit test run
         ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
-        Utilities.buildAndRun(project, new JUnitLauncher(compilationUnit));
+        Utilities.buildAndRun(project, new JUnitLauncher(compilationUnit, ps.getMemoryLimit()));
         sourceFile = taskSourceFile;
       }
       
