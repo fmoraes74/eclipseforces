@@ -28,6 +28,8 @@ class JUnitLauncher extends AbstractLauncher {
   private ICompilationUnit unit;
   
   private String memoryLimit;
+  
+  private boolean shouldRun;
 
   /**
    * Create a new launcher for a new java class file (ICompilationUnit).
@@ -35,9 +37,10 @@ class JUnitLauncher extends AbstractLauncher {
    * @param unit
    *            The .java file to run
    */
-  public JUnitLauncher(ICompilationUnit unit, String memory) {
+  public JUnitLauncher(ICompilationUnit unit, String memory, boolean run) {
     this.unit = unit;
     memoryLimit = memory;
+    shouldRun = run;
   }
 
   private String getClassName() {
@@ -78,4 +81,9 @@ class JUnitLauncher extends AbstractLauncher {
         Collections.singletonMap("[run]", "org.eclipse.jdt.junit.launchconfig"));
   }
 
+  @Override
+  protected boolean shouldRun()
+  {
+    return shouldRun;
+  }
 }

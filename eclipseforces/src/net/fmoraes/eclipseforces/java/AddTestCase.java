@@ -98,7 +98,7 @@ public class AddTestCase extends AbstractHandler {
           }
           int next = existing.size() > 0 ? (existing.last() + 1) : 0;
           IEclipsePreferences prefs = EclipseForcesPlugin.getProjectPrefs(project);
-          String name = res.getElementName();
+          String name = type.getElementName();
           int timeLimit = prefs.getInt("timeout." + name, 1);
           JavaCodeGenerator gen = new JavaCodeGenerator(new ArrayList<ProblemStatement>());
           gen.setProject(project.getProject());

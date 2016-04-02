@@ -37,14 +37,15 @@ public abstract class AbstractLauncher implements Runnable {
       ILaunchConfigurationWorkingCopy workingCopy = createLaunchWorkingCopy();
       setUpConfiguration(workingCopy);
       final ILaunchConfiguration configuration = workingCopy.doSave();
-      Utilities.runInDisplayThread(new Runnable() {
+      if(shouldRun())
+        Utilities.runInDisplayThread(new Runnable() {
 
-        public void run() {
-          // must be called from ui thread
-          DebugUITools.launch(configuration, ILaunchManager.RUN_MODE);
-        }
+          public void run() {
+            // must be called from ui thread
+            DebugUITools.launch(configuration, ILaunchManager.RUN_MODE);
+          }
 
-      });
+        });
     } catch (Exception e) {
       Utilities.showException(e);
     }
@@ -56,4 +57,9 @@ public abstract class AbstractLauncher implements Runnable {
   }
 
   protected abstract void setUpConfiguration(ILaunchConfigurationWorkingCopy config) throws Exception;
+  
+  protected boolean shouldRun()
+  {
+    return true;
+  }
 }

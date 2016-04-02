@@ -2,15 +2,8 @@ package net.fmoraes.eclipseforces.java;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-
-import net.fmoraes.eclipseforces.Contest;
-import net.fmoraes.eclipseforces.EclipseForcesPlugin;
-import net.fmoraes.eclipseforces.ProblemStatement;
-import net.fmoraes.eclipseforces.ProblemStatementView;
-import net.fmoraes.eclipseforces.languages.CodeGenerator;
-import net.fmoraes.eclipseforces.languages.LanguageSupport;
-import net.fmoraes.eclipseforces.util.Utilities;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -32,6 +25,14 @@ import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.JavaUI;
 import org.osgi.framework.Version;
+
+import net.fmoraes.eclipseforces.Contest;
+import net.fmoraes.eclipseforces.EclipseForcesPlugin;
+import net.fmoraes.eclipseforces.ProblemStatement;
+import net.fmoraes.eclipseforces.ProblemStatementView;
+import net.fmoraes.eclipseforces.languages.CodeGenerator;
+import net.fmoraes.eclipseforces.languages.LanguageSupport;
+import net.fmoraes.eclipseforces.util.Utilities;
 
 /**
  * For more information on the JDT java model, see:
@@ -100,6 +101,8 @@ public class JavaLanguageSupport extends LanguageSupport {
     IEclipsePreferences prefs = EclipseForcesPlugin.getProjectPrefs(project);
     prefs.put(ProblemStatementView.CONTEST_KEY, contest.name);
     
+    ArrayList<JUnitLauncher> tests = new ArrayList<JUnitLauncher>();
+    
     for(ProblemStatement ps : getProblems()) {
       prefs.put(ps.getClassName() + ".java", String.format("http://www.codeforces.com/contest/%s/problem/%s", contest.id, ps.getID()));
       prefs.put(ps.getClassName() + "Test.java", String.format("http://www.codeforces.com/contest/%s/problem/%s", contest.id, ps.getID()));
@@ -114,11 +117,15 @@ public class JavaLanguageSupport extends LanguageSupport {
       IJavaElement javaElement = javaProject.findElement(new Path(ps.getClassName()
           + "Test.java"));
   
-      if (javaElement != null && sourceFile == null) {
+      if (javaElement != null) {
         // Run initial JUnit test run
         ICompilationUnit compilationUnit = (ICompilationUnit) javaElement;
-        Utilities.buildAndRun(project, new JUnitLauncher(compilationUnit, ps.getMemoryLimit()));
-        sourceFile = taskSourceFile;
+        if(sourceFile == null) {
+          tests.add(new JUnitLauncher(compilationUnit, ps.getMemoryLimit(), true));
+          sourceFile = taskSourceFile;
+        } else {
+          tests.add(new JUnitLauncher(compilationUnit, ps.getMemoryLimit(), false));
+        }
       }
       
       try {
@@ -128,6 +135,19 @@ public class JavaLanguageSupport extends LanguageSupport {
         Utilities.showException(e);
       }
     }
+    
+    Utilities.buildAndRun(project, new Runnable() {
+      public void run() {
+        for(JUnitLauncher launcher : tests) {
+          try {
+            launcher.run();
+          }
+          catch(Exception e) {
+            Utilities.showException(e);
+          }
+        }
+    }
+    });
 
     return sourceFile;
   }
