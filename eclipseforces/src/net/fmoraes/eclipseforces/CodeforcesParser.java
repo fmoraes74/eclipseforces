@@ -210,7 +210,7 @@ public class CodeforcesParser {
       }
     }
 
-    Matcher testFinder = Pattern.compile("class=\"input\".*?<pre>(.*?)</pre>.*?class=\"output\".*?<pre>(.+?)</pre>").matcher(text);
+    Matcher testFinder = Pattern.compile("class=\"input\".*?<pre>(.*?)</pre>.*?class=\"output\".*?<pre>(.+?)</pre>", Pattern.DOTALL).matcher(text);
     List<ProblemStatement.TestCase> tests = new ArrayList<>();
     while (testFinder.find()) {
       String in = StringEscapeUtils.unescapeHtml4(testFinder.group(1)).replaceAll("<br />", "\n");
